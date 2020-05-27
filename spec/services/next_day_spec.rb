@@ -5,7 +5,7 @@ require 'rails_helper'
 RSpec.describe NextDay, type: :service do
   subject { described_class.call }
 
-  it 'reduces the quality of an item by 1' do
+  it 'decreases the quality of an item by 1' do
     item = create :item, quality: 20
 
     subject
@@ -13,7 +13,7 @@ RSpec.describe NextDay, type: :service do
     expect(item.reload.quality).to eq 19
   end
 
-  it "reduces an item's sell_in by 1" do
+  it "decreases an item's sell_in by 1" do
     item = create :item, sell_in: 20
 
     subject
@@ -22,7 +22,7 @@ RSpec.describe NextDay, type: :service do
   end
 
   context "when an item's sell_in has expired," do
-    it 'reduces quality by 2' do
+    it 'decreases quality by 2' do
       item = create :item, sell_in: -1, quality: 20
 
       subject
@@ -105,6 +105,26 @@ RSpec.describe NextDay, type: :service do
         subject
 
         expect(item.reload.quality).to eq 23
+      end
+    end
+  end
+
+  context "with a 'Conjured' item:" do
+    it 'decreases quality by 2' do
+      item = create :item, name: 'Conjured item', quality: 20
+
+      subject
+
+      expect(item.reload.quality).to eq 18
+    end
+
+    context "when it has expired," do
+      it 'decreases quality by 4' do
+        item = create :item, name: 'Conjured item', quality: 20, sell_in: -1
+
+        subject
+
+        expect(item.reload.quality).to eq 16
       end
     end
   end
